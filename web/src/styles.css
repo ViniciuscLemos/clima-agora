@@ -17,14 +17,15 @@ body {
 }
 
 /* o fundo muda conforme o tempo */
-.app.nublado { background: linear-gradient(#a9b7cb, #eef2f7); }
-.app.chuva { background: linear-gradient(#6b7c96, #c9d3e0); }
-.app.noite { background: linear-gradient(#0f1b38, #2c4170); }
-.app.noite header,
-.app.noite .vazio,
-.app.noite .recentes .cinza,
-.app.noite footer,
-.app.noite footer a { color: #e6ecf7; }
+.fundo-nublado { background: linear-gradient(#a9b7cb, #eef2f7); }
+.fundo-chuva { background: linear-gradient(#6b7c96, #c9d3e0); }
+.fundo-noite { background: linear-gradient(#0f1b38, #2c4170); }
+.fundo-chuva header,
+.fundo-noite header,
+.fundo-noite .vazio,
+.fundo-noite .recentes .cinza,
+.fundo-noite footer,
+.fundo-noite footer a { color: #f2f5fb; }
 
 header, main, footer {
   max-width: 920px;

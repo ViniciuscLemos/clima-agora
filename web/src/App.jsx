@@ -84,7 +84,7 @@ export default function App() {
   const hoje = dados && dataLocalIso(dados.atual.atualizado_em, dados.local.fuso_segundos);
 
   return (
-    <div className={`app ${dados ? fundoDoClima(dados.atual.icone) : ''}`}>
+    <div className={`app ${dados ? 'fundo-' + fundoDoClima(dados.atual.icone) : ''}`}>
       <header>
         <h1>Clima Agora</h1>
         <div className="unidades">
