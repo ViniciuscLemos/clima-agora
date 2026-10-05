@@ -107,7 +107,7 @@ function formatarQualidadeAr(ar) {
   };
 }
 
-function montarResposta({ local, atual, previsao, ar, demo = false }) {
+function montarResposta({ local, atual, previsao, ar, fonte }) {
   const fuso = atual.timezone ?? previsao.city?.timezone ?? 0;
   return {
     local: { ...local, fuso_segundos: fuso },
@@ -115,7 +115,7 @@ function montarResposta({ local, atual, previsao, ar, demo = false }) {
     horas: formatarHoras(previsao),
     dias: formatarDias(previsao, fuso),
     qualidade_ar: formatarQualidadeAr(ar),
-    demo,
+    fonte,
   };
 }
 

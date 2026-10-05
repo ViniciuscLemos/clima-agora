@@ -9,7 +9,7 @@ const { formatarCidade, montarResposta } = require('./transformar');
 const DEZ_MINUTOS = 10 * 60 * 1000;
 const PASTA_WEB = path.join(__dirname, '..', '..', 'web', 'dist');
 
-function criarApp(cliente, { demo = false } = {}) {
+function criarApp(cliente, { fonte = 'openweather' } = {}) {
   const app = express();
   app.set('trust proxy', 1); // pro rate limit pegar o IP certo no Render
 
@@ -74,7 +74,7 @@ function criarApp(cliente, { demo = false } = {}) {
       }
 
       const { atual, previsao, ar } = await buscarClima(local.lat, local.lon);
-      res.json(montarResposta({ local, atual, previsao, ar, demo }));
+      res.json(montarResposta({ local, atual, previsao, ar, fonte }));
     } catch (e) {
       next(e);
     }

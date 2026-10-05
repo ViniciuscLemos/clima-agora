@@ -4,7 +4,6 @@ const request = require('supertest');
 
 const f = require('./fixtures');
 const { criarApp } = require('../src/app');
-const { criarClienteDemo } = require('../src/demo');
 
 // cliente falso no lugar da OpenWeather, contando as chamadas
 function clienteFalso(extra = {}) {
@@ -88,16 +87,5 @@ describe('GET /api/cidades', () => {
     const res = await request(criarApp(cliente)).get('/api/cidades?q=s');
     assert.deepEqual(res.body, []);
     assert.equal(chamadas.cidades, 0);
-  });
-});
-
-describe('modo demo', () => {
-  it('responde qualquer cidade com os dados de exemplo', async () => {
-    const app = criarApp(criarClienteDemo(), { demo: true });
-    const res = await request(app).get('/api/clima?cidade=recife');
-    assert.equal(res.status, 200);
-    assert.equal(res.body.demo, true);
-    assert.equal(res.body.local.nome, 'Recife');
-    assert.equal(res.body.dias.length, 5);
   });
 });
