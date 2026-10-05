@@ -106,12 +106,6 @@ export default function App() {
           </div>
         )}
 
-        {dados?.demo && (
-          <p className="aviso">
-            Rodando sem chave da API, então esses dados são de exemplo. Coloque sua chave em <code>server/.env</code> pra ver o clima de verdade.
-          </p>
-        )}
-
         {erro && <p className="erro">{erro}</p>}
 
         {!dados && !erro && (
@@ -130,7 +124,9 @@ export default function App() {
       </main>
 
       <footer>
-        Dados da <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> ·
+        {dados?.fonte === 'open-meteo'
+          ? <>Dados do <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · </>
+          : <>Dados da <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> · </>}
         feito por <a href="https://github.com/ViniciuscLemos" target="_blank" rel="noreferrer">Vinicius Lemos</a>
       </footer>
     </div>
