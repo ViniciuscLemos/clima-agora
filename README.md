@@ -26,7 +26,9 @@ npm run dev
 
 Abre em http://localhost:5173.
 
-Sem chave ele usa uma resposta de exemplo que salvei em `server/src/exemplo.json`, então dá pra ver a tela funcionando mesmo assim. Pra usar o clima de verdade:
+Já funciona sem configurar nada: sem chave da OpenWeather, o servidor usa o [Open-Meteo](https://open-meteo.com/), que é grátis e não pede chave (e o Nominatim do OpenStreetMap pra achar o nome da cidade pela localização). Converti as respostas dele pro mesmo formato da OpenWeather, então o resto do código é igual pros dois.
+
+Pra usar a OpenWeather:
 
 1. cria uma conta grátis na [OpenWeather](https://home.openweathermap.org/users/sign_up) e copia sua chave
 2. copia o `server/.env.example` pra `server/.env` e cola a chave lá
