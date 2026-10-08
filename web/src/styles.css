@@ -119,7 +119,7 @@ button.secundario {
   cursor: pointer;
 }
 
-.sugestoes li:hover {
+.sugestoes li.destaque {
   background: #eaf1ff;
 }
 
