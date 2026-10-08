@@ -2,6 +2,8 @@
 
 App de previsão do tempo feito em React + Node. Você digita uma cidade (ou usa sua localização) e ele mostra o clima de agora, as próximas horas, os próximos 5 dias e a qualidade do ar.
 
+![Clima Agora mostrando o tempo no Rio de Janeiro](docs/print.png)
+
 Os dados vêm da API da [OpenWeather](https://openweathermap.org/api). Fiz principalmente pra praticar React consumindo uma API de verdade.
 
 ## Por que tem um servidor
@@ -52,9 +54,13 @@ npm test
 
 ## O que tem
 
-- busca com sugestões enquanto digita
+- busca com sugestões enquanto digita (dá pra escolher com as setas e Enter)
 - botão de usar a localização do navegador
 - °C ou °F (fica salvo)
 - últimas cidades pesquisadas
 - horários sempre no fuso da cidade (se pesquisar Tóquio, o pôr do sol aparece no horário de lá)
 - o fundo muda se tá sol, nublado, chovendo ou de noite
+
+No celular fica assim:
+
+<img src="docs/print-celular.png" alt="Clima Agora no celular" width="300">
