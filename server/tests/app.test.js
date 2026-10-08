@@ -82,6 +82,15 @@ describe('GET /api/cidades', () => {
     assert.equal(res.body[0].nome, 'São Paulo');
   });
 
+  it('não repete a mesma cidade', async () => {
+    const repetida = { name: 'Curitiba', state: 'Rio de Janeiro', country: 'BR', lat: -22.1, lon: -43.2 };
+    const { cliente } = clienteFalso({
+      cidades: async () => [repetida, { ...repetida, lat: -22.2 }, { ...repetida, state: 'Paraná' }],
+    });
+    const res = await request(criarApp(cliente)).get('/api/cidades?q=curitiba');
+    assert.deepEqual(res.body.map((c) => c.estado), ['Rio de Janeiro', 'Paraná']);
+  });
+
   it('com menos de 2 letras nem chama a API', async () => {
     const { cliente, chamadas } = clienteFalso();
     const res = await request(criarApp(cliente)).get('/api/cidades?q=s');

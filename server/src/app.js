@@ -38,8 +38,15 @@ function criarApp(cliente, { fonte = 'openweather' } = {}) {
     const q = String(req.query.q || '').trim();
     if (q.length < 2) return res.json([]);
     try {
-      const cidades = await cliente.cidades(q);
-      res.json(cidades.map(formatarCidade));
+      const cidades = (await cliente.cidades(q)).map(formatarCidade);
+      // as APIs às vezes devolvem a mesma cidade duas vezes com coordenadas um pouco diferentes
+      const vistas = new Set();
+      res.json(cidades.filter((c) => {
+        const chave = `${c.nome}|${c.estado}|${c.pais}`;
+        if (vistas.has(chave)) return false;
+        vistas.add(chave);
+        return true;
+      }));
     } catch (e) {
       next(e);
     }
