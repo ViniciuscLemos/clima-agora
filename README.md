@@ -62,6 +62,11 @@ npm test
 - últimas cidades pesquisadas
 - horários sempre no fuso da cidade (se pesquisar Tóquio, o pôr do sol aparece no horário de lá)
 - o fundo muda se tá sol, nublado, chovendo ou de noite
+- modo escuro, que segue o tema do sistema
+
+No modo escuro:
+
+![Clima Agora no modo escuro](docs/print-escuro.png)
 
 No celular fica assim:
 
