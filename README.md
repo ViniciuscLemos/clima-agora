@@ -1,5 +1,7 @@
 # Clima Agora
 
+![Testes](https://github.com/ViniciuscLemos/clima-agora/actions/workflows/testes.yml/badge.svg)
+
 App de previsão do tempo feito em React + Node. Você digita uma cidade (ou usa sua localização) e ele mostra o clima de agora, as próximas horas, os próximos 5 dias e a qualidade do ar.
 
 ![Clima Agora mostrando o tempo no Rio de Janeiro](docs/print.png)
