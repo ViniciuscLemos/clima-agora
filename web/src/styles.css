@@ -2,23 +2,64 @@
   box-sizing: border-box;
 }
 
+/* cores num lugar só, pra dar pra trocar no modo escuro */
+:root {
+  color-scheme: light dark;
+  --corpo: #cfe3ff;
+  --texto: #1d2738;
+  --subtitulo: #56637a;
+  --cinza: #66738a;
+  --cartao: rgba(255, 255, 255, 0.85);
+  --caixa: #f1f5fb;
+  --campo: #fff;
+  --borda: #c4cfdf;
+  --linha: #e5eaf2;
+  --destaque: #eaf1ff;
+  --chip: rgba(255, 255, 255, 0.75);
+  --azul-texto: #2f6fec;
+  --fundo-limpo: linear-gradient(#8ec5ff, #e8f2ff);
+  --fundo-nublado: linear-gradient(#a9b7cb, #eef2f7);
+  --fundo-chuva: linear-gradient(#6b7c96, #c9d3e0);
+}
+
+/* segue o tema do sistema */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --corpo: #0f1d36;
+    --texto: #e6ecf7;
+    --subtitulo: #a9b6cc;
+    --cinza: #93a0b6;
+    --cartao: rgba(22, 30, 46, 0.88);
+    --caixa: #222d42;
+    --campo: #1b2436;
+    --borda: #3a4760;
+    --linha: #2b3750;
+    --destaque: #2a3a5c;
+    --chip: rgba(22, 30, 46, 0.75);
+    --azul-texto: #7fa7ff;
+    --fundo-limpo: linear-gradient(#173a6b, #0f1d36);
+    --fundo-nublado: linear-gradient(#2c3442, #161b24);
+    --fundo-chuva: linear-gradient(#222b3a, #11161f);
+  }
+}
+
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  color: #1d2738;
-  background: #cfe3ff;
+  color: var(--texto);
+  background: var(--corpo);
 }
 
 .app {
   min-height: 100vh;
   padding: 0 16px 24px;
-  background: linear-gradient(#8ec5ff, #e8f2ff);
+  background: var(--fundo-limpo);
   transition: background 0.5s;
 }
 
 /* o fundo muda conforme o tempo */
-.fundo-nublado { background: linear-gradient(#a9b7cb, #eef2f7); }
-.fundo-chuva { background: linear-gradient(#6b7c96, #c9d3e0); }
+.fundo-nublado { background: var(--fundo-nublado); }
+.fundo-chuva { background: var(--fundo-chuva); }
 .fundo-noite { background: linear-gradient(#0f1b38, #2c4170); }
 .fundo-chuva header,
 .fundo-noite header,
@@ -60,14 +101,14 @@ button:disabled {
 }
 
 button.secundario {
-  background: #fff;
-  color: #1d2738;
+  background: var(--campo);
+  color: var(--texto);
 }
 
 .unidades button {
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.6);
-  color: #1d2738;
+  background: var(--chip);
+  color: var(--texto);
 }
 
 .unidades button.ativo {
@@ -95,8 +136,10 @@ button.secundario {
   width: 100%;
   padding: 11px 14px;
   font: inherit;
-  border: 1px solid #c4cfdf;
+  border: 1px solid var(--borda);
   border-radius: 10px;
+  background: var(--campo);
+  color: var(--texto);
 }
 
 .sugestoes {
@@ -108,7 +151,7 @@ button.secundario {
   margin: 4px 0 0;
   padding: 4px;
   list-style: none;
-  background: #fff;
+  background: var(--campo);
   border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
@@ -120,7 +163,7 @@ button.secundario {
 }
 
 .sugestoes li.destaque {
-  background: #eaf1ff;
+  background: var(--destaque);
 }
 
 .recentes {
@@ -135,14 +178,14 @@ button.secundario {
 .chip {
   padding: 4px 12px;
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #1d2738;
+  background: var(--chip);
+  color: var(--texto);
 }
 
 .link {
   padding: 4px;
   background: none;
-  color: #2f6fec;
+  color: var(--azul-texto);
   text-decoration: underline;
 }
 
@@ -152,7 +195,7 @@ button.secundario {
   margin: 0 0 14px;
 }
 
-.aviso { background: #fff4cc; }
+.aviso { background: #fff4cc; color: #5c4a00; }
 .erro { background: #fde2e2; color: #9b1c1c; }
 
 .vazio {
@@ -180,7 +223,7 @@ button.secundario {
 }
 
 .cartao {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--cartao);
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -194,11 +237,11 @@ button.secundario {
 .cartao h3 {
   margin: 0 0 10px;
   font-size: 1rem;
-  color: #56637a;
+  color: var(--subtitulo);
 }
 
 .cinza {
-  color: #66738a;
+  color: var(--cinza);
   margin: 2px 0;
 }
 
@@ -228,14 +271,14 @@ button.secundario {
 }
 
 .detalhes div {
-  background: #f1f5fb;
+  background: var(--caixa);
   border-radius: 10px;
   padding: 8px 10px;
 }
 
 .detalhes dt {
   font-size: 0.8rem;
-  color: #66738a;
+  color: var(--cinza);
 }
 
 .detalhes dd {
@@ -262,7 +305,7 @@ button.secundario {
 
 .chuva {
   font-size: 0.78rem;
-  color: #2f6fec;
+  color: var(--azul-texto);
 }
 
 .dias {
@@ -276,7 +319,7 @@ button.secundario {
   grid-template-columns: 5.5rem 44px 3rem 1fr;
   align-items: center;
   padding: 2px 0;
-  border-bottom: 1px solid #e5eaf2;
+  border-bottom: 1px solid var(--linha);
 }
 
 .dias li:last-child {
@@ -290,7 +333,7 @@ button.secundario {
 footer {
   text-align: center;
   font-size: 0.85rem;
-  color: #56637a;
+  color: var(--subtitulo);
   padding-top: 24px;
 }
 
@@ -319,4 +362,11 @@ footer a {
 /* os ícones da OpenWeather têm nuvem branca, que some no card claro */
 .grade img {
   filter: drop-shadow(0 1px 2px rgba(30, 41, 59, 0.45));
+}
+
+/* no escuro é o contrário: a lua cinza-escura some no card, então ganha um brilho claro */
+@media (prefers-color-scheme: dark) {
+  .grade img {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.55));
+  }
 }
