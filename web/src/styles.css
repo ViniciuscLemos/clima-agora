@@ -315,3 +315,8 @@ footer a {
     font-size: 3rem;
   }
 }
+
+/* os ícones da OpenWeather têm nuvem branca, que some no card claro */
+.grade img {
+  filter: drop-shadow(0 1px 2px rgba(30, 41, 59, 0.45));
+}
