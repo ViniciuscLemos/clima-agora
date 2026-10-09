@@ -203,6 +203,34 @@ button.secundario {
   padding: 40px 0;
 }
 
+/* atalhos da tela inicial */
+.cidades-brasil {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cidades-brasil h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--subtitulo);
+}
+
+.cidades-grade {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cidades-grade .chip {
+  padding: 8px 16px;
+}
+
+.cidades-grade .chip:hover {
+  background: var(--destaque);
+}
+
 /* cartões */
 .grade {
   display: grid;
