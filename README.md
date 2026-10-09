@@ -4,6 +4,10 @@
 
 App de previsão do tempo feito em React + Node. Você digita uma cidade (ou usa sua localização) e ele mostra o clima de agora, as próximas horas, os próximos 5 dias e a qualidade do ar.
 
+**Dá pra usar aqui:** https://clima-agora-g5jz.onrender.com
+
+Tá hospedado no plano grátis do Render, que desliga o servidor depois de um tempo sem acesso. Se for o primeiro acesso em um tempo, a página pode levar uns 50 segundos pra abrir. Depois disso fica rápido.
+
 ![Clima Agora mostrando o tempo no Rio de Janeiro](docs/print.png)
 
 Os dados vêm da API da [OpenWeather](https://openweathermap.org/api). Fiz principalmente pra praticar React consumindo uma API de verdade.
@@ -39,7 +43,9 @@ Pra usar a OpenWeather:
 
 A chave nova pode demorar umas 2 horas pra começar a funcionar.
 
-Pra produção:
+O deploy no Render tá configurado no `render.yaml`: ele monta o React, sobe o Express e usa a rota `/api/saude` pra saber se o app subiu. Cada push na `main` atualiza o site sozinho.
+
+Pra rodar a versão de produção no seu computador:
 
 ```bash
 npm run build
