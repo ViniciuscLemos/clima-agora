@@ -64,6 +64,7 @@ npm test
 
 - busca com sugestões enquanto digita (dá pra escolher com as setas e Enter)
 - botão de usar a localização do navegador
+- atalhos pras principais cidades do Brasil na tela inicial
 - °C ou °F (fica salvo)
 - últimas cidades pesquisadas
 - horários sempre no fuso da cidade (se pesquisar Tóquio, o pôr do sol aparece no horário de lá)
