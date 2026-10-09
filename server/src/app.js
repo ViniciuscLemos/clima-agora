@@ -32,6 +32,9 @@ function criarApp(cliente, { fonte = 'openweather' } = {}) {
     return dados;
   }
 
+  // o Render chama essa rota pra saber se o app subiu (fica antes do limite de requisições)
+  app.get('/api/saude', (req, res) => res.json({ ok: true }));
+
   app.use('/api', rateLimit({ windowMs: 60 * 1000, limit: 60 }));
 
   app.get('/api/cidades', async (req, res, next) => {

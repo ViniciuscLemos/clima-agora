@@ -75,6 +75,16 @@ describe('GET /api/clima', () => {
   });
 });
 
+describe('GET /api/saude', () => {
+  it('responde ok sem chamar a API do tempo', async () => {
+    const { cliente, chamadas } = clienteFalso();
+    const res = await request(criarApp(cliente)).get('/api/saude');
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body, { ok: true });
+    assert.equal(chamadas.agora, 0);
+  });
+});
+
 describe('GET /api/cidades', () => {
   it('devolve as sugestões', async () => {
     const { cliente } = clienteFalso();
