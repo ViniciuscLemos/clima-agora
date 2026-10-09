@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { climaPorLocal, climaPorNome } from './api';
 import { dataLocalIso, fundoDoClima } from './utils/formatar';
 import Busca from './components/Busca';
+import CidadesBrasil from './components/CidadesBrasil';
 import ClimaAtual from './components/ClimaAtual';
 import { ProximasHoras, ProximosDias } from './components/Previsao';
 
@@ -112,6 +113,8 @@ export default function App() {
           <p className="vazio">{carregando ? 'Carregando...' : 'Pesquise uma cidade pra ver o clima.'}</p>
         )}
 
+        {!dados && !carregando && <CidadesBrasil onEscolher={buscarLocal} />}
+
         {dados && (
           <div className={`grade ${carregando ? 'carregando' : ''}`}>
             <ClimaAtual local={dados.local} atual={dados.atual} ar={dados.qualidade_ar} unidade={unidade} />
@@ -124,9 +127,9 @@ export default function App() {
       </main>
 
       <footer>
-        {dados?.fonte === 'open-meteo'
-          ? <>Dados do <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · </>
-          : <>Dados da <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> · </>}
+        {/* só mostra a fonte depois da primeira busca, antes disso não dá pra saber qual é */}
+        {dados?.fonte === 'open-meteo' && <>Dados do <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · </>}
+        {dados?.fonte === 'openweather' && <>Dados da <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> · </>}
         feito por <a href="https://github.com/ViniciuscLemos" target="_blank" rel="noreferrer">Vinicius Lemos</a>
       </footer>
     </div>
