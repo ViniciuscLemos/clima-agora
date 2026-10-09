@@ -3,108 +3,108 @@ const assert = require('node:assert/strict');
 const request = require('supertest');
 
 const f = require('./fixtures');
-const { criarApp } = require('../src/app');
+const { createApp } = require('../src/app');
 
-// cliente falso no lugar da OpenWeather, contando as chamadas
-function clienteFalso(extra = {}) {
-  const chamadas = { cidades: 0, agora: 0 };
-  const cliente = {
-    cidades: async (q) => {
-      chamadas.cidades++;
+// fake client in place of OpenWeather, counting the calls
+function fakeClient(extra = {}) {
+  const calls = { cities: 0, current: 0 };
+  const client = {
+    cities: async (q) => {
+      calls.cities++;
       return q.toLowerCase().includes('paulo') ? f.geocoding : [];
     },
-    reverso: async () => f.geocoding,
-    agora: async () => {
-      chamadas.agora++;
-      return f.atual;
+    reverse: async () => f.geocoding,
+    current: async () => {
+      calls.current++;
+      return f.current;
     },
-    previsao: async () => f.previsao,
-    ar: async () => f.ar,
+    forecast: async () => f.forecast,
+    air: async () => f.air,
     ...extra,
   };
-  return { cliente, chamadas };
+  return { client, calls };
 }
 
-describe('GET /api/clima', () => {
-  it('busca pelo nome da cidade', async () => {
-    const { cliente } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/clima?cidade=São Paulo');
+describe('GET /api/weather', () => {
+  it('searches by city name', async () => {
+    const { client } = fakeClient();
+    const res = await request(createApp(client)).get('/api/weather?city=São Paulo');
 
     assert.equal(res.status, 200);
-    assert.equal(res.body.local.nome, 'São Paulo');
-    assert.equal(res.body.atual.descricao, 'Nublado');
-    assert.equal(res.body.dias.length, 5);
-    assert.equal(res.body.horas.length, 8);
-    assert.equal(res.body.qualidade_ar.rotulo, 'Razoável');
+    assert.equal(res.body.location.name, 'São Paulo');
+    assert.equal(res.body.current.description, 'Overcast clouds');
+    assert.equal(res.body.days.length, 5);
+    assert.equal(res.body.hours.length, 8);
+    assert.equal(res.body.air_quality.label, 'Fair');
   });
 
-  it('não chama a API de novo pra mesma cidade (cache)', async () => {
-    const { cliente, chamadas } = clienteFalso();
-    const app = criarApp(cliente);
-    await request(app).get('/api/clima?cidade=São Paulo');
-    await request(app).get('/api/clima?cidade=São Paulo');
-    assert.equal(chamadas.agora, 1);
+  it("doesn't call the API again for the same city (cache)", async () => {
+    const { client, calls } = fakeClient();
+    const app = createApp(client);
+    await request(app).get('/api/weather?city=São Paulo');
+    await request(app).get('/api/weather?city=São Paulo');
+    assert.equal(calls.current, 1);
   });
 
-  it('cidade que não existe dá 404', async () => {
-    const { cliente } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/clima?cidade=Xyzópolis');
+  it('a city that does not exist gives 404', async () => {
+    const { client } = fakeClient();
+    const res = await request(createApp(client)).get('/api/weather?city=Nowhereville');
     assert.equal(res.status, 404);
-    assert.match(res.body.erro, /Xyzópolis/);
+    assert.match(res.body.error, /Nowhereville/);
   });
 
-  it('sem cidade nem coordenada dá 400', async () => {
-    const { cliente } = clienteFalso();
-    const app = criarApp(cliente);
-    assert.equal((await request(app).get('/api/clima')).status, 400);
-    assert.equal((await request(app).get('/api/clima?lat=abc&lon=1')).status, 400);
+  it('no city and no coordinates gives 400', async () => {
+    const { client } = fakeClient();
+    const app = createApp(client);
+    assert.equal((await request(app).get('/api/weather')).status, 400);
+    assert.equal((await request(app).get('/api/weather?lat=abc&lon=1')).status, 400);
   });
 
-  it('busca por coordenada e usa o nome que veio junto', async () => {
-    const { cliente } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/clima?lat=-8.05&lon=-34.88&nome=Recife&pais=BR');
+  it('searches by coordinates and uses the name sent along', async () => {
+    const { client } = fakeClient();
+    const res = await request(createApp(client)).get('/api/weather?lat=-8.05&lon=-34.88&name=Recife&country=BR');
     assert.equal(res.status, 200);
-    assert.equal(res.body.local.nome, 'Recife');
+    assert.equal(res.body.location.name, 'Recife');
   });
 
-  it('funciona mesmo se a qualidade do ar falhar', async () => {
-    const { cliente } = clienteFalso({ ar: async () => { throw new Error('fora do ar'); } });
-    const res = await request(criarApp(cliente)).get('/api/clima?cidade=São Paulo');
+  it('still works if air quality fails', async () => {
+    const { client } = fakeClient({ air: async () => { throw new Error('offline'); } });
+    const res = await request(createApp(client)).get('/api/weather?city=São Paulo');
     assert.equal(res.status, 200);
-    assert.equal(res.body.qualidade_ar, null);
+    assert.equal(res.body.air_quality, null);
   });
 });
 
-describe('GET /api/saude', () => {
-  it('responde ok sem chamar a API do tempo', async () => {
-    const { cliente, chamadas } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/saude');
+describe('GET /api/health', () => {
+  it('answers ok without calling the weather API', async () => {
+    const { client, calls } = fakeClient();
+    const res = await request(createApp(client)).get('/api/health');
     assert.equal(res.status, 200);
     assert.deepEqual(res.body, { ok: true });
-    assert.equal(chamadas.agora, 0);
+    assert.equal(calls.current, 0);
   });
 });
 
-describe('GET /api/cidades', () => {
-  it('devolve as sugestões', async () => {
-    const { cliente } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/cidades?q=sao paulo');
-    assert.equal(res.body[0].nome, 'São Paulo');
+describe('GET /api/cities', () => {
+  it('returns the suggestions', async () => {
+    const { client } = fakeClient();
+    const res = await request(createApp(client)).get('/api/cities?q=sao paulo');
+    assert.equal(res.body[0].name, 'São Paulo');
   });
 
-  it('não repete a mesma cidade', async () => {
-    const repetida = { name: 'Curitiba', state: 'Rio de Janeiro', country: 'BR', lat: -22.1, lon: -43.2 };
-    const { cliente } = clienteFalso({
-      cidades: async () => [repetida, { ...repetida, lat: -22.2 }, { ...repetida, state: 'Paraná' }],
+  it("doesn't repeat the same city", async () => {
+    const repeated = { name: 'Curitiba', state: 'Rio de Janeiro', country: 'BR', lat: -22.1, lon: -43.2 };
+    const { client } = fakeClient({
+      cities: async () => [repeated, { ...repeated, lat: -22.2 }, { ...repeated, state: 'Paraná' }],
     });
-    const res = await request(criarApp(cliente)).get('/api/cidades?q=curitiba');
-    assert.deepEqual(res.body.map((c) => c.estado), ['Rio de Janeiro', 'Paraná']);
+    const res = await request(createApp(client)).get('/api/cities?q=curitiba');
+    assert.deepEqual(res.body.map((c) => c.state), ['Rio de Janeiro', 'Paraná']);
   });
 
-  it('com menos de 2 letras nem chama a API', async () => {
-    const { cliente, chamadas } = clienteFalso();
-    const res = await request(criarApp(cliente)).get('/api/cidades?q=s');
+  it("with fewer than 2 letters it doesn't even call the API", async () => {
+    const { client, calls } = fakeClient();
+    const res = await request(createApp(client)).get('/api/cities?q=s');
     assert.deepEqual(res.body, []);
-    assert.equal(chamadas.cidades, 0);
+    assert.equal(calls.cities, 0);
   });
 });

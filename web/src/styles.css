@@ -2,71 +2,71 @@
   box-sizing: border-box;
 }
 
-/* cores num lugar só, pra dar pra trocar no modo escuro */
+/* colors in one place, so they can be swapped in dark mode */
 :root {
   color-scheme: light dark;
-  --corpo: #cfe3ff;
-  --texto: #1d2738;
-  --subtitulo: #56637a;
-  --cinza: #66738a;
-  --cartao: rgba(255, 255, 255, 0.85);
-  --caixa: #f1f5fb;
-  --campo: #fff;
-  --borda: #c4cfdf;
-  --linha: #e5eaf2;
-  --destaque: #eaf1ff;
+  --body: #cfe3ff;
+  --text: #1d2738;
+  --subtitle: #56637a;
+  --muted: #66738a;
+  --card: rgba(255, 255, 255, 0.85);
+  --box: #f1f5fb;
+  --field: #fff;
+  --border: #c4cfdf;
+  --line: #e5eaf2;
+  --highlight: #eaf1ff;
   --chip: rgba(255, 255, 255, 0.75);
-  --azul-texto: #2f6fec;
-  --fundo-limpo: linear-gradient(#8ec5ff, #e8f2ff);
-  --fundo-nublado: linear-gradient(#a9b7cb, #eef2f7);
-  --fundo-chuva: linear-gradient(#6b7c96, #c9d3e0);
+  --blue-text: #2f6fec;
+  --bg-clear: linear-gradient(#8ec5ff, #e8f2ff);
+  --bg-cloudy: linear-gradient(#a9b7cb, #eef2f7);
+  --bg-rain: linear-gradient(#6b7c96, #c9d3e0);
 }
 
-/* segue o tema do sistema */
+/* follows the system theme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --corpo: #0f1d36;
-    --texto: #e6ecf7;
-    --subtitulo: #a9b6cc;
-    --cinza: #93a0b6;
-    --cartao: rgba(22, 30, 46, 0.88);
-    --caixa: #222d42;
-    --campo: #1b2436;
-    --borda: #3a4760;
-    --linha: #2b3750;
-    --destaque: #2a3a5c;
+    --body: #0f1d36;
+    --text: #e6ecf7;
+    --subtitle: #a9b6cc;
+    --muted: #93a0b6;
+    --card: rgba(22, 30, 46, 0.88);
+    --box: #222d42;
+    --field: #1b2436;
+    --border: #3a4760;
+    --line: #2b3750;
+    --highlight: #2a3a5c;
     --chip: rgba(22, 30, 46, 0.75);
-    --azul-texto: #7fa7ff;
-    --fundo-limpo: linear-gradient(#173a6b, #0f1d36);
-    --fundo-nublado: linear-gradient(#2c3442, #161b24);
-    --fundo-chuva: linear-gradient(#222b3a, #11161f);
+    --blue-text: #7fa7ff;
+    --bg-clear: linear-gradient(#173a6b, #0f1d36);
+    --bg-cloudy: linear-gradient(#2c3442, #161b24);
+    --bg-rain: linear-gradient(#222b3a, #11161f);
   }
 }
 
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  color: var(--texto);
-  background: var(--corpo);
+  color: var(--text);
+  background: var(--body);
 }
 
 .app {
   min-height: 100vh;
   padding: 0 16px 24px;
-  background: var(--fundo-limpo);
+  background: var(--bg-clear);
   transition: background 0.5s;
 }
 
-/* o fundo muda conforme o tempo */
-.fundo-nublado { background: var(--fundo-nublado); }
-.fundo-chuva { background: var(--fundo-chuva); }
-.fundo-noite { background: linear-gradient(#0f1b38, #2c4170); }
-.fundo-chuva header,
-.fundo-noite header,
-.fundo-noite .vazio,
-.fundo-noite .recentes .cinza,
-.fundo-noite footer,
-.fundo-noite footer a { color: #f2f5fb; }
+/* the background changes with the weather */
+.bg-cloudy { background: var(--bg-cloudy); }
+.bg-rain { background: var(--bg-rain); }
+.bg-night { background: linear-gradient(#0f1b38, #2c4170); }
+.bg-rain header,
+.bg-night header,
+.bg-night .empty,
+.bg-night .recent .muted,
+.bg-night footer,
+.bg-night footer a { color: #f2f5fb; }
 
 header, main, footer {
   max-width: 920px;
@@ -100,49 +100,49 @@ button:disabled {
   cursor: wait;
 }
 
-button.secundario {
-  background: var(--campo);
-  color: var(--texto);
+button.secondary {
+  background: var(--field);
+  color: var(--text);
 }
 
-.unidades button {
+.units button {
   padding: 6px 10px;
   background: var(--chip);
-  color: var(--texto);
+  color: var(--text);
 }
 
-.unidades button.ativo {
+.units button.active {
   background: #2f6fec;
   color: #fff;
 }
 
-.unidades button + button {
+.units button + button {
   margin-left: 4px;
 }
 
-/* busca */
-.busca {
+/* search */
+.search {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
 }
 
-.campo {
+.field {
   position: relative;
   flex: 1;
 }
 
-.campo input {
+.field input {
   width: 100%;
   padding: 11px 14px;
   font: inherit;
-  border: 1px solid var(--borda);
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--campo);
-  color: var(--texto);
+  background: var(--field);
+  color: var(--text);
 }
 
-.sugestoes {
+.suggestions {
   position: absolute;
   top: 100%;
   left: 0;
@@ -151,22 +151,22 @@ button.secundario {
   margin: 4px 0 0;
   padding: 4px;
   list-style: none;
-  background: var(--campo);
+  background: var(--field);
   border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.sugestoes li {
+.suggestions li {
   padding: 9px 10px;
   border-radius: 6px;
   cursor: pointer;
 }
 
-.sugestoes li.destaque {
-  background: var(--destaque);
+.suggestions li.highlight {
+  background: var(--highlight);
 }
 
-.recentes {
+.recent {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -179,101 +179,101 @@ button.secundario {
   padding: 4px 12px;
   border-radius: 99px;
   background: var(--chip);
-  color: var(--texto);
+  color: var(--text);
 }
 
 .link {
   padding: 4px;
   background: none;
-  color: var(--azul-texto);
+  color: var(--blue-text);
   text-decoration: underline;
 }
 
-.aviso, .erro {
+.warning, .error {
   padding: 10px 14px;
   border-radius: 10px;
   margin: 0 0 14px;
 }
 
-.aviso { background: #fff4cc; color: #5c4a00; }
-.erro { background: #fde2e2; color: #9b1c1c; }
+.warning { background: #fff4cc; color: #5c4a00; }
+.error { background: #fde2e2; color: #9b1c1c; }
 
-.vazio {
+.empty {
   text-align: center;
   padding: 40px 0;
 }
 
-/* atalhos da tela inicial */
-.cidades-brasil {
+/* home screen shortcuts */
+.brazil-cities {
   max-width: 640px;
   margin: 0 auto;
   text-align: center;
 }
 
-.cidades-brasil h3 {
+.brazil-cities h3 {
   margin: 0 0 12px;
   font-size: 1rem;
-  color: var(--subtitulo);
+  color: var(--subtitle);
 }
 
-.cidades-grade {
+.city-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
 }
 
-.cidades-grade .chip {
+.city-grid .chip {
   padding: 8px 16px;
 }
 
-.cidades-grade .chip:hover {
-  background: var(--destaque);
+.city-grid .chip:hover {
+  background: var(--highlight);
 }
 
-/* cartões */
-.grade {
+/* cards */
+.grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-items: start;
 }
 
-.grade.carregando {
+.grid.loading {
   opacity: 0.6;
 }
 
-.coluna {
+.column {
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-width: 0;
 }
 
-.cartao {
-  background: var(--cartao);
+.card {
+  background: var(--card);
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.cartao h2 {
+.card h2 {
   margin: 0;
   font-size: 1.25rem;
 }
 
-.cartao h3 {
+.card h3 {
   margin: 0 0 10px;
   font-size: 1rem;
-  color: var(--subtitulo);
+  color: var(--subtitle);
 }
 
-.cinza {
-  color: var(--cinza);
+.muted {
+  color: var(--muted);
   margin: 2px 0;
 }
 
-.principal {
+.main-info {
   display: flex;
   align-items: center;
   margin: 6px 0 12px;
@@ -286,35 +286,35 @@ button.secundario {
   line-height: 1;
 }
 
-.descricao {
+.description {
   font-weight: 600;
   margin: 6px 0 2px;
 }
 
-.detalhes {
+.details {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 8px;
   margin: 0;
 }
 
-.detalhes div {
-  background: var(--caixa);
+.details div {
+  background: var(--box);
   border-radius: 10px;
   padding: 8px 10px;
 }
 
-.detalhes dt {
+.details dt {
   font-size: 0.8rem;
-  color: var(--cinza);
+  color: var(--muted);
 }
 
-.detalhes dd {
+.details dd {
   margin: 2px 0 0;
   font-weight: 600;
 }
 
-.horas {
+.hours {
   display: flex;
   gap: 6px;
   overflow-x: auto;
@@ -323,7 +323,7 @@ button.secundario {
   list-style: none;
 }
 
-.horas li {
+.hours li {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -331,37 +331,37 @@ button.secundario {
   font-size: 0.9rem;
 }
 
-.chuva {
+.rain {
   font-size: 0.78rem;
-  color: var(--azul-texto);
+  color: var(--blue-text);
 }
 
-.dias {
+.days {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.dias li {
+.days li {
   display: grid;
   grid-template-columns: 5.5rem 44px 3rem 1fr;
   align-items: center;
   padding: 2px 0;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--line);
 }
 
-.dias li:last-child {
+.days li:last-child {
   border-bottom: none;
 }
 
-.dia {
+.day {
   font-weight: 600;
 }
 
 footer {
   text-align: center;
   font-size: 0.85rem;
-  color: var(--subtitulo);
+  color: var(--subtitle);
   padding-top: 24px;
 }
 
@@ -370,15 +370,15 @@ footer a {
 }
 
 @media (max-width: 720px) {
-  .grade {
+  .grid {
     grid-template-columns: 1fr;
   }
 
-  .busca {
+  .search {
     flex-wrap: wrap;
   }
 
-  .campo {
+  .field {
     flex-basis: 100%;
   }
 
@@ -387,14 +387,14 @@ footer a {
   }
 }
 
-/* os ícones da OpenWeather têm nuvem branca, que some no card claro */
-.grade img {
+/* the OpenWeather icons have white clouds, which disappear on the light card */
+.grid img {
   filter: drop-shadow(0 1px 2px rgba(30, 41, 59, 0.45));
 }
 
-/* no escuro é o contrário: a lua cinza-escura some no card, então ganha um brilho claro */
+/* in dark mode it is the other way around: the dark gray moon disappears on the card, so it gets a light glow */
 @media (prefers-color-scheme: dark) {
-  .grade img {
+  .grid img {
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.55));
   }
 }

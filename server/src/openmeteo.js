@@ -1,49 +1,49 @@
-// Usado quando não tem chave da OpenWeather. O Open-Meteo é grátis e não pede chave.
-// As respostas são convertidas pro mesmo formato da OpenWeather, assim o resto
-// do servidor (transformar.js) funciona igual pros dois.
-const { erro } = require('./openweather');
+// Used when there's no OpenWeather key. Open-Meteo is free and doesn't need a key.
+// The responses are converted to the same format as OpenWeather, so the rest
+// of the server (transform.js) works the same for both.
+const { httpError } = require('./openweather');
 
-// códigos de tempo da OMM que o Open-Meteo usa -> [descrição, ícone da OpenWeather]
-const CODIGOS = {
-  0: ['céu limpo', '01'],
-  1: ['poucas nuvens', '02'],
-  2: ['parcialmente nublado', '03'],
-  3: ['nublado', '04'],
-  45: ['neblina', '50'],
-  48: ['neblina', '50'],
-  51: ['garoa fraca', '09'],
-  53: ['garoa', '09'],
-  55: ['garoa forte', '09'],
-  56: ['garoa congelante', '09'],
-  57: ['garoa congelante', '09'],
-  61: ['chuva fraca', '10'],
-  63: ['chuva moderada', '10'],
-  65: ['chuva forte', '10'],
-  66: ['chuva congelante', '13'],
-  67: ['chuva congelante', '13'],
-  71: ['neve fraca', '13'],
-  73: ['neve', '13'],
-  75: ['neve forte', '13'],
-  77: ['neve', '13'],
-  80: ['pancadas de chuva', '09'],
-  81: ['pancadas de chuva', '09'],
-  82: ['pancadas de chuva forte', '09'],
-  85: ['pancadas de neve', '13'],
-  86: ['pancadas de neve', '13'],
-  95: ['trovoada', '11'],
-  96: ['trovoada com granizo', '11'],
-  99: ['trovoada com granizo', '11'],
+// WMO weather codes used by Open-Meteo -> [description, OpenWeather icon]
+const CODES = {
+  0: ['clear sky', '01'],
+  1: ['few clouds', '02'],
+  2: ['partly cloudy', '03'],
+  3: ['overcast', '04'],
+  45: ['fog', '50'],
+  48: ['fog', '50'],
+  51: ['light drizzle', '09'],
+  53: ['drizzle', '09'],
+  55: ['heavy drizzle', '09'],
+  56: ['freezing drizzle', '09'],
+  57: ['freezing drizzle', '09'],
+  61: ['light rain', '10'],
+  63: ['moderate rain', '10'],
+  65: ['heavy rain', '10'],
+  66: ['freezing rain', '13'],
+  67: ['freezing rain', '13'],
+  71: ['light snow', '13'],
+  73: ['snow', '13'],
+  75: ['heavy snow', '13'],
+  77: ['snow', '13'],
+  80: ['rain showers', '09'],
+  81: ['rain showers', '09'],
+  82: ['heavy rain showers', '09'],
+  85: ['snow showers', '13'],
+  86: ['snow showers', '13'],
+  95: ['thunderstorm', '11'],
+  96: ['thunderstorm with hail', '11'],
+  99: ['thunderstorm with hail', '11'],
 };
 
-const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+const noAccents = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
-function tempo(codigo, dia) {
-  const [description, icone] = CODIGOS[codigo] || ['', '03'];
-  return [{ description, icon: icone + (dia ? 'd' : 'n') }];
+function weatherFor(code, isDay) {
+  const [description, icon] = CODES[code] || ['', '03'];
+  return [{ description, icon: icon + (isDay ? 'd' : 'n') }];
 }
 
-// o índice europeu vai de 0 a 100+, a OpenWeather usa de 1 a 5
-function indiceAr(aqi) {
+// the European index goes from 0 to 100+, OpenWeather uses 1 to 5
+function airIndex(aqi) {
   if (aqi <= 20) return 1;
   if (aqi <= 40) return 2;
   if (aqi <= 60) return 3;
@@ -51,27 +51,27 @@ function indiceAr(aqi) {
   return 5;
 }
 
-function criarClienteOpenMeteo(fetchFn = fetch) {
+function createOpenMeteoClient(fetchFn = fetch) {
   async function get(url) {
     let res;
     try {
       res = await fetchFn(url, {
         signal: AbortSignal.timeout(8000),
-        headers: { 'User-Agent': 'clima-agora (github.com/ViniciuscLemos/clima-agora)' },
+        headers: { 'User-Agent': 'weather-now (github.com/ViniciuscLemos/weather-now)' },
       });
     } catch {
-      throw erro(503, 'Não consegui buscar o clima agora. Tenta de novo daqui a pouco.');
+      throw httpError(503, "Couldn't get the weather right now. Try again in a bit.");
     }
-    if (!res.ok) throw erro(502, `O serviço de clima respondeu com erro ${res.status}.`);
+    if (!res.ok) throw httpError(502, `The weather service answered with error ${res.status}.`);
     return res.json();
   }
 
-  // agora() e previsao() usam a mesma chamada, então guardo por 1 minuto pra não buscar duas vezes
-  const ultimas = new Map();
-  function previsaoBruta(lat, lon) {
-    const chave = `${lat},${lon}`;
-    const salvo = ultimas.get(chave);
-    if (salvo && salvo.expira > Date.now()) return salvo.promessa;
+  // current() and forecast() use the same call, so I keep it for 1 minute to avoid fetching twice
+  const recent = new Map();
+  function rawForecast(lat, lon) {
+    const key = `${lat},${lon}`;
+    const saved = recent.get(key);
+    if (saved && saved.expires > Date.now()) return saved.promise;
 
     const params = new URLSearchParams({
       latitude: lat,
@@ -84,14 +84,14 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
       timeformat: 'unixtime',
       wind_speed_unit: 'ms',
     });
-    const promessa = get(`https://api.open-meteo.com/v1/forecast?${params}`);
-    promessa.catch(() => ultimas.delete(chave));
-    ultimas.set(chave, { promessa, expira: Date.now() + 60 * 1000 });
-    return promessa;
+    const promise = get(`https://api.open-meteo.com/v1/forecast?${params}`);
+    promise.catch(() => recent.delete(key));
+    recent.set(key, { promise, expires: Date.now() + 60 * 1000 });
+    return promise;
   }
 
-  async function buscarNoNominatim(q) {
-    const params = new URLSearchParams({ q, format: 'json', 'accept-language': 'pt', addressdetails: 1, limit: 1 });
+  async function searchNominatim(q) {
+    const params = new URLSearchParams({ q, format: 'json', 'accept-language': 'en', addressdetails: 1, limit: 1 });
     const [r] = await get(`https://nominatim.openstreetmap.org/search?${params}`);
     if (!r) return null;
     return {
@@ -104,25 +104,25 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
   }
 
   return {
-    async cidades(q, limit = 5) {
-      const params = new URLSearchParams({ name: q, count: 10, language: 'pt', format: 'json' });
-      const dados = await get(`https://geocoding-api.open-meteo.com/v1/search?${params}`);
+    async cities(q, limit = 5) {
+      const params = new URLSearchParams({ name: q, count: 10, language: 'en', format: 'json' });
+      const data = await get(`https://geocoding-api.open-meteo.com/v1/search?${params}`);
 
-      // primeiro as que têm o nome digitado (às vezes vem cidade que só bate num nome alternativo),
-      // depois as maiores, senão "Paris" vira Paris do Texas
-      const temNome = (c) => (semAcento(c.name).includes(semAcento(q)) ? 1 : 0);
-      const resultados = (dados.results || []).sort((a, b) =>
-        temNome(b) - temNome(a) || (b.population || 0) - (a.population || 0));
+      // first the ones that have the typed name (sometimes a city only matches an alternate name),
+      // then the biggest ones, otherwise "Paris" becomes Paris, Texas
+      const hasName = (c) => (noAccents(c.name).includes(noAccents(q)) ? 1 : 0);
+      const results = (data.results || []).sort((a, b) =>
+        hasName(b) - hasName(a) || (b.population || 0) - (a.population || 0));
 
-      // o Open-Meteo só conhece o nome original ("Moscou" acha um vilarejo na Bélgica).
-      // Na busca final (limit 1), se só achou lugar pequeno, tento no Nominatim, que entende português.
-      // No autocompletar não dá pra usar o Nominatim, as regras deles não deixam.
-      if (limit === 1 && !(resultados[0]?.population > 5000)) {
-        const achado = await buscarNoNominatim(q).catch(() => null);
-        if (achado) return [achado];
+      // Open-Meteo only knows the original name ("Moscou" finds a village in Belgium).
+      // On the final search (limit 1), if it only found a small place, I try Nominatim, which knows other languages.
+      // Nominatim can't be used for autocomplete, their usage rules don't allow it.
+      if (limit === 1 && !(results[0]?.population > 5000)) {
+        const found = await searchNominatim(q).catch(() => null);
+        if (found) return [found];
       }
 
-      return resultados.slice(0, limit).map((c) => ({
+      return results.slice(0, limit).map((c) => ({
         name: c.name,
         state: c.admin1,
         country: c.country_code,
@@ -131,23 +131,23 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
       }));
     },
 
-    async reverso(lat, lon) {
-      const params = new URLSearchParams({ lat, lon, format: 'json', 'accept-language': 'pt', zoom: 10 });
-      const dados = await get(`https://nominatim.openstreetmap.org/reverse?${params}`);
-      const a = dados.address || {};
-      const nome = a.city || a.town || a.village || a.municipality;
-      if (!nome) return [];
-      return [{ name: nome, state: a.state, country: (a.country_code || '').toUpperCase(), lat, lon }];
+    async reverse(lat, lon) {
+      const params = new URLSearchParams({ lat, lon, format: 'json', 'accept-language': 'en', zoom: 10 });
+      const data = await get(`https://nominatim.openstreetmap.org/reverse?${params}`);
+      const a = data.address || {};
+      const name = a.city || a.town || a.village || a.municipality;
+      if (!name) return [];
+      return [{ name, state: a.state, country: (a.country_code || '').toUpperCase(), lat, lon }];
     },
 
-    async agora(lat, lon) {
-      const f = await previsaoBruta(lat, lon);
+    async current(lat, lon) {
+      const f = await rawForecast(lat, lon);
       const c = f.current;
-      // visibilidade só vem por hora, pego a da hora atual
+      // visibility only comes hourly, so I take the current hour's
       const i = Math.max(0, f.hourly.time.findIndex((t) => t > c.time) - 1);
 
       return {
-        weather: tempo(c.weather_code, c.is_day),
+        weather: weatherFor(c.weather_code, c.is_day),
         main: {
           temp: c.temperature_2m,
           feels_like: c.apparent_temperature,
@@ -164,14 +164,14 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
       };
     },
 
-    async previsao(lat, lon) {
-      const f = await previsaoBruta(lat, lon);
+    async forecast(lat, lon) {
+      const f = await rawForecast(lat, lon);
       const h = f.hourly;
-      const agora = Date.now() / 1000;
+      const now = Date.now() / 1000;
 
-      // a OpenWeather manda de 3 em 3 horas a partir da próxima hora, faço igual
+      // OpenWeather sends every 3 hours starting from the next hour, I do the same
       const list = [];
-      for (let i = h.time.findIndex((t) => t >= agora); i >= 0 && i < h.time.length && list.length < 40; i += 3) {
+      for (let i = h.time.findIndex((t) => t >= now); i >= 0 && i < h.time.length && list.length < 40; i += 3) {
         list.push({
           dt: h.time[i],
           main: {
@@ -180,7 +180,7 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
             temp_max: h.temperature_2m[i],
             humidity: h.relative_humidity_2m[i],
           },
-          weather: tempo(h.weather_code[i], h.is_day[i]),
+          weather: weatherFor(h.weather_code[i], h.is_day[i]),
           pop: (h.precipitation_probability[i] ?? 0) / 100,
         });
       }
@@ -188,14 +188,14 @@ function criarClienteOpenMeteo(fetchFn = fetch) {
       return { list, city: { timezone: f.utc_offset_seconds } };
     },
 
-    async ar(lat, lon) {
+    async air(lat, lon) {
       const params = new URLSearchParams({ latitude: lat, longitude: lon, current: 'european_aqi,pm10,pm2_5' });
-      const dados = await get(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`);
-      const c = dados.current;
+      const data = await get(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`);
+      const c = data.current;
       if (c?.european_aqi == null) return null;
-      return { list: [{ main: { aqi: indiceAr(c.european_aqi) }, components: { pm2_5: c.pm2_5, pm10: c.pm10 } }] };
+      return { list: [{ main: { aqi: airIndex(c.european_aqi) }, components: { pm2_5: c.pm2_5, pm10: c.pm10 } }] };
     },
   };
 }
 
-module.exports = { criarClienteOpenMeteo };
+module.exports = { createOpenMeteoClient };

@@ -1,23 +1,23 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const { criarApp } = require('./app');
-const { criarCliente } = require('./openweather');
-const { criarClienteOpenMeteo } = require('./openmeteo');
+const { createApp } = require('./app');
+const { createClient } = require('./openweather');
+const { createOpenMeteoClient } = require('./openmeteo');
 
-const chave = process.env.OPENWEATHER_API_KEY;
+const key = process.env.OPENWEATHER_API_KEY;
 const PORT = process.env.PORT || 3001;
 
-// com chave usa a OpenWeather, sem chave usa o Open-Meteo (que é grátis e não pede chave)
-const cliente = chave ? criarCliente(chave) : criarClienteOpenMeteo();
-const fonte = chave ? 'openweather' : 'open-meteo';
+// with a key it uses OpenWeather, without one it uses Open-Meteo (free, no key needed)
+const client = key ? createClient(key) : createOpenMeteoClient();
+const source = key ? 'openweather' : 'open-meteo';
 
-if (!chave) {
-  console.log('Sem OPENWEATHER_API_KEY no server/.env, usando o Open-Meteo.');
+if (!key) {
+  console.log('No OPENWEATHER_API_KEY in server/.env, using Open-Meteo.');
 }
 
-const app = criarApp(cliente, { fonte });
+const app = createApp(client, { source });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

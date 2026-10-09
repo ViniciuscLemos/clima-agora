@@ -1,80 +1,97 @@
-# Clima Agora
+# Weather Now
 
-![Testes](https://github.com/ViniciuscLemos/clima-agora/actions/workflows/testes.yml/badge.svg)
+![Tests](https://github.com/ViniciuscLemos/weather-now/actions/workflows/tests.yml/badge.svg)
 
-App de previsão do tempo feito em React + Node. Você digita uma cidade (ou usa sua localização) e ele mostra o clima de agora, as próximas horas, os próximos 5 dias e a qualidade do ar.
+A weather forecast app built with React + Node. You type a city (or use your location) and it shows the current weather, the next hours, the next 5 days and the air quality.
 
-**Dá pra usar aqui:** https://clima-agora-g5jz.onrender.com
+**Try it here:** https://clima-agora-g5jz.onrender.com
 
-Tá hospedado no plano grátis do Render, que desliga o servidor depois de um tempo sem acesso. Se for o primeiro acesso em um tempo, a página pode levar uns 50 segundos pra abrir. Depois disso fica rápido.
+It's hosted on Render's free plan, which shuts the server down after a while without visits. If nobody opened it in a while, the page can take about 50 seconds to load. After that it's fast.
 
-![Clima Agora mostrando o tempo no Rio de Janeiro](docs/print.png)
+![Weather Now showing the weather in Tokyo](docs/screenshot.png)
 
-Os dados vêm da API da [OpenWeather](https://openweathermap.org/api). Fiz principalmente pra praticar React consumindo uma API de verdade.
+The data comes from the [OpenWeather](https://openweathermap.org/api) API (or Open-Meteo, more on that below). I made it mainly to practice React talking to a real API.
 
-## Por que tem um servidor
+## Why there's a server
 
-A OpenWeather precisa de uma chave, e se eu chamasse a API direto do React a chave ia ficar visível pra qualquer um no navegador. Então o front chama o meu servidor (Express), e ele chama a OpenWeather.
+OpenWeather needs a key, and if I called the API straight from React the key would be visible to anyone in the browser. So the front end calls my server (Express), and the server calls OpenWeather.
 
-Já que ia ter servidor mesmo, aproveitei pra:
-- juntar as 3 chamadas (tempo atual, previsão e qualidade do ar) numa só
-- guardar as respostas por 10 minutos, pra não gastar o limite do plano grátis
-- limitar as requisições por IP com o `express-rate-limit`
+Since there was going to be a server anyway, I used it to:
+- merge the 3 calls (current weather, forecast and air quality) into one
+- cache the responses for 10 minutes, so I don't burn through the free plan limit
+- rate limit requests per IP with `express-rate-limit`
 
-## Rodando
+## Running
 
-Precisa do Node 20+.
+You need Node 20+.
 
 ```bash
-git clone https://github.com/ViniciuscLemos/clima-agora
-cd clima-agora
+git clone https://github.com/ViniciuscLemos/weather-now
+cd weather-now
 npm install
 npm run dev
 ```
 
-Abre em http://localhost:5173.
+It opens at http://localhost:5173.
 
-Já funciona sem configurar nada: sem chave da OpenWeather, o servidor usa o [Open-Meteo](https://open-meteo.com/), que é grátis e não pede chave (e o Nominatim do OpenStreetMap pra achar o nome da cidade pela localização). Converti as respostas dele pro mesmo formato da OpenWeather, então o resto do código é igual pros dois.
+It works without setting anything up: with no OpenWeather key, the server uses [Open-Meteo](https://open-meteo.com/), which is free and needs no key (and OpenStreetMap's Nominatim to find the city name from your location). I convert its responses to the same format as OpenWeather, so the rest of the code is the same for both.
 
-Pra usar a OpenWeather:
+To use OpenWeather:
 
-1. cria uma conta grátis na [OpenWeather](https://home.openweathermap.org/users/sign_up) e copia sua chave
-2. copia o `server/.env.example` pra `server/.env` e cola a chave lá
+1. create a free account at [OpenWeather](https://home.openweathermap.org/users/sign_up) and copy your key
+2. copy `server/.env.example` to `server/.env` and paste the key there
 
-A chave nova pode demorar umas 2 horas pra começar a funcionar.
+A new key can take about 2 hours to start working.
 
-O deploy no Render tá configurado no `render.yaml`: ele monta o React, sobe o Express e usa a rota `/api/saude` pra saber se o app subiu. Cada push na `main` atualiza o site sozinho.
+The Render deploy is set up in `render.yaml`: it builds React, starts Express and uses the `/api/health` route to know the app is up. Every push to `main` updates the site on its own.
 
-Pra rodar a versão de produção no seu computador:
+To run the production version on your computer:
 
 ```bash
 npm run build
 npm start
 ```
 
-Aí o próprio servidor entrega o site em http://localhost:3001.
+Then the server itself serves the site at http://localhost:3001.
 
-## Testes
+## Tests
 
 ```bash
 npm test
 ```
 
-## O que tem
+## Features
 
-- busca com sugestões enquanto digita (dá pra escolher com as setas e Enter)
-- botão de usar a localização do navegador
-- atalhos pras principais cidades do Brasil na tela inicial
-- °C ou °F (fica salvo)
-- últimas cidades pesquisadas
-- horários sempre no fuso da cidade (se pesquisar Tóquio, o pôr do sol aparece no horário de lá)
-- o fundo muda se tá sol, nublado, chovendo ou de noite
-- modo escuro, que segue o tema do sistema
+- search with suggestions while you type (you can pick one with the arrow keys and Enter)
+- a button to use the browser's location
+- shortcuts to the major cities in Brazil on the home screen
+- °C or °F (it's remembered)
+- recently searched cities
+- times always in the city's timezone (if you search Tokyo, the sunset shows Tokyo's time)
+- the background changes if it's sunny, cloudy, raining or night
+- dark mode, which follows the system theme
 
-No modo escuro:
+The home screen and dark mode:
 
-![Clima Agora no modo escuro](docs/print-escuro.png)
+<p>
+  <img src="docs/screenshot-home.png" alt="Weather Now home screen with the city shortcuts" width="420">
+  <img src="docs/screenshot-dark.png" alt="Weather Now in dark mode" width="420">
+</p>
 
-No celular fica assim:
+On the phone it looks like this:
 
-<img src="docs/print-celular.png" alt="Clima Agora no celular" width="300">
+<img src="docs/screenshot-mobile.png" alt="Weather Now on the phone" width="300">
+
+## Structure
+
+```
+server/
+  src/app.js           Express routes and cache
+  src/openweather.js   OpenWeather client
+  src/openmeteo.js     Open-Meteo client (converts to the OpenWeather format)
+  src/transform.js     keeps only what the front end uses
+web/
+  src/App.jsx          main state
+  src/components/      Search, BrazilCities, CurrentWeather, Forecast
+  src/utils/format.js  times, temperatures, wind
+```

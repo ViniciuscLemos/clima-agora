@@ -4,26 +4,26 @@ async function get(url, signal) {
     res = await fetch(url, { signal });
   } catch (e) {
     if (e.name === 'AbortError') throw e;
-    throw new Error('Não consegui falar com o servidor. Ele tá rodando?');
+    throw new Error("Couldn't reach the server. Is it running?");
   }
 
-  const corpo = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(corpo.erro || `Erro ${res.status}`);
-  return corpo;
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `Error ${res.status}`);
+  return body;
 }
 
-export function climaPorNome(cidade, signal) {
-  return get(`/api/clima?${new URLSearchParams({ cidade })}`, signal);
+export function weatherByName(city, signal) {
+  return get(`/api/weather?${new URLSearchParams({ city })}`, signal);
 }
 
-export function climaPorLocal({ lat, lon, nome, estado, pais }, signal) {
+export function weatherByPlace({ lat, lon, name, state, country }, signal) {
   const params = new URLSearchParams({ lat, lon });
-  if (nome) params.set('nome', nome);
-  if (estado) params.set('estado', estado);
-  if (pais) params.set('pais', pais);
-  return get(`/api/clima?${params}`, signal);
+  if (name) params.set('name', name);
+  if (state) params.set('state', state);
+  if (country) params.set('country', country);
+  return get(`/api/weather?${params}`, signal);
 }
 
-export function sugerirCidades(q, signal) {
-  return get(`/api/cidades?${new URLSearchParams({ q })}`, signal);
+export function suggestCities(q, signal) {
+  return get(`/api/cities?${new URLSearchParams({ q })}`, signal);
 }

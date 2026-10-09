@@ -1,42 +1,42 @@
 const BASE = 'https://api.openweathermap.org';
 
-function erro(status, mensagem) {
-  const e = new Error(mensagem);
+function httpError(status, message) {
+  const e = new Error(message);
   e.status = status;
   return e;
 }
 
-function criarCliente(chave, fetchFn = fetch) {
-  async function get(caminho, params) {
-    const url = new URL(caminho, BASE);
-    url.search = new URLSearchParams({ ...params, appid: chave });
+function createClient(key, fetchFn = fetch) {
+  async function get(route, params) {
+    const url = new URL(route, BASE);
+    url.search = new URLSearchParams({ ...params, appid: key });
 
     let res;
     try {
       res = await fetchFn(url, { signal: AbortSignal.timeout(8000) });
     } catch {
-      throw erro(503, 'Não consegui falar com a OpenWeather. Tenta de novo daqui a pouco.');
+      throw httpError(503, "Couldn't reach OpenWeather. Try again in a bit.");
     }
 
     if (res.status === 401) {
-      throw erro(502, 'Chave da OpenWeather inválida (se você acabou de criar, ela demora umas 2h pra funcionar).');
+      throw httpError(502, 'Invalid OpenWeather key (if you just created it, it takes about 2h to start working).');
     }
     if (res.status === 429) {
-      throw erro(503, 'Muitas consultas na OpenWeather, espera um minuto.');
+      throw httpError(503, 'Too many requests to OpenWeather, wait a minute.');
     }
     if (!res.ok) {
-      throw erro(502, `A OpenWeather respondeu com erro ${res.status}.`);
+      throw httpError(502, `OpenWeather answered with error ${res.status}.`);
     }
     return res.json();
   }
 
   return {
-    cidades: (q, limit = 5) => get('/geo/1.0/direct', { q, limit }),
-    reverso: (lat, lon) => get('/geo/1.0/reverse', { lat, lon, limit: 1 }),
-    agora: (lat, lon) => get('/data/2.5/weather', { lat, lon, units: 'metric', lang: 'pt_br' }),
-    previsao: (lat, lon) => get('/data/2.5/forecast', { lat, lon, units: 'metric', lang: 'pt_br' }),
-    ar: (lat, lon) => get('/data/2.5/air_pollution', { lat, lon }),
+    cities: (q, limit = 5) => get('/geo/1.0/direct', { q, limit }),
+    reverse: (lat, lon) => get('/geo/1.0/reverse', { lat, lon, limit: 1 }),
+    current: (lat, lon) => get('/data/2.5/weather', { lat, lon, units: 'metric', lang: 'en' }),
+    forecast: (lat, lon) => get('/data/2.5/forecast', { lat, lon, units: 'metric', lang: 'en' }),
+    air: (lat, lon) => get('/data/2.5/air_pollution', { lat, lon }),
   };
 }
 
-module.exports = { criarCliente, erro };
+module.exports = { createClient, httpError };

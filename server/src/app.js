@@ -3,51 +3,51 @@ const fs = require('fs');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 
-const { erro } = require('./openweather');
-const { formatarCidade, montarResposta } = require('./transformar');
+const { httpError } = require('./openweather');
+const { formatCity, buildResponse } = require('./transform');
 
-const DEZ_MINUTOS = 10 * 60 * 1000;
-const PASTA_WEB = path.join(__dirname, '..', '..', 'web', 'dist');
+const TEN_MINUTES = 10 * 60 * 1000;
+const WEB_FOLDER = path.join(__dirname, '..', '..', 'web', 'dist');
 
-function criarApp(cliente, { fonte = 'openweather' } = {}) {
+function createApp(client, { source = 'openweather' } = {}) {
   const app = express();
-  app.set('trust proxy', 1); // pro rate limit pegar o IP certo no Render
+  app.set('trust proxy', 1); // so the rate limit gets the right IP on Render
 
-  // cache por coordenada (2 casas decimais dá mais ou menos 1 km)
+  // cache by coordinate (2 decimal places is roughly 1 km)
   const cache = new Map();
 
-  async function buscarClima(lat, lon) {
-    const chave = `${lat.toFixed(2)},${lon.toFixed(2)}`;
-    const salvo = cache.get(chave);
-    if (salvo && salvo.expira > Date.now()) return salvo.dados;
+  async function getWeather(lat, lon) {
+    const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+    const saved = cache.get(key);
+    if (saved && saved.expires > Date.now()) return saved.data;
 
-    const [atual, previsao, ar] = await Promise.all([
-      cliente.agora(lat, lon),
-      cliente.previsao(lat, lon),
-      cliente.ar(lat, lon).catch(() => null), // se a qualidade do ar falhar, mostra o resto
+    const [current, forecast, air] = await Promise.all([
+      client.current(lat, lon),
+      client.forecast(lat, lon),
+      client.air(lat, lon).catch(() => null), // if air quality fails, show the rest
     ]);
 
-    const dados = { atual, previsao, ar };
-    cache.set(chave, { dados, expira: Date.now() + DEZ_MINUTOS });
-    return dados;
+    const data = { current, forecast, air };
+    cache.set(key, { data, expires: Date.now() + TEN_MINUTES });
+    return data;
   }
 
-  // o Render chama essa rota pra saber se o app subiu (fica antes do limite de requisições)
-  app.get('/api/saude', (req, res) => res.json({ ok: true }));
+  // Render calls this route to know the app is up (it sits before the rate limit)
+  app.get('/api/health', (req, res) => res.json({ ok: true }));
 
   app.use('/api', rateLimit({ windowMs: 60 * 1000, limit: 60 }));
 
-  app.get('/api/cidades', async (req, res, next) => {
+  app.get('/api/cities', async (req, res, next) => {
     const q = String(req.query.q || '').trim();
     if (q.length < 2) return res.json([]);
     try {
-      const cidades = (await cliente.cidades(q)).map(formatarCidade);
-      // as APIs às vezes devolvem a mesma cidade duas vezes com coordenadas um pouco diferentes
-      const vistas = new Set();
-      res.json(cidades.filter((c) => {
-        const chave = `${c.nome}|${c.estado}|${c.pais}`;
-        if (vistas.has(chave)) return false;
-        vistas.add(chave);
+      const cities = (await client.cities(q)).map(formatCity);
+      // the APIs sometimes return the same city twice with slightly different coordinates
+      const seen = new Set();
+      res.json(cities.filter((c) => {
+        const key = `${c.name}|${c.state}|${c.country}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
         return true;
       }));
     } catch (e) {
@@ -55,54 +55,54 @@ function criarApp(cliente, { fonte = 'openweather' } = {}) {
     }
   });
 
-  // /api/clima?cidade=Recife  ou  /api/clima?lat=-8.05&lon=-34.88
-  app.get('/api/clima', async (req, res, next) => {
+  // /api/weather?city=Recife  or  /api/weather?lat=-8.05&lon=-34.88
+  app.get('/api/weather', async (req, res, next) => {
     try {
-      let local;
+      let location;
 
-      if (req.query.cidade) {
-        const nome = String(req.query.cidade).trim();
-        const [cidade] = await cliente.cidades(nome, 1);
-        if (!cidade) throw erro(404, `Não achei nenhuma cidade chamada "${nome}".`);
-        local = formatarCidade(cidade);
+      if (req.query.city) {
+        const name = String(req.query.city).trim();
+        const [city] = await client.cities(name, 1);
+        if (!city) throw httpError(404, `Couldn't find any city called "${name}".`);
+        location = formatCity(city);
       } else if (req.query.lat && req.query.lon) {
         const lat = Number(req.query.lat);
         const lon = Number(req.query.lon);
         if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
-          throw erro(400, 'Latitude ou longitude inválida.');
+          throw httpError(400, 'Invalid latitude or longitude.');
         }
 
-        if (req.query.nome) {
-          // quando vem do autocompletar o nome já vem junto
-          local = { nome: req.query.nome, estado: req.query.estado || null, pais: req.query.pais || null, lat, lon };
+        if (req.query.name) {
+          // when it comes from the autocomplete the name comes along
+          location = { name: req.query.name, state: req.query.state || null, country: req.query.country || null, lat, lon };
         } else {
-          const [achado] = await cliente.reverso(lat, lon).catch(() => []);
-          local = achado ? { ...formatarCidade(achado), lat, lon } : { nome: 'Sua localização', estado: null, pais: null, lat, lon };
+          const [found] = await client.reverse(lat, lon).catch(() => []);
+          location = found ? { ...formatCity(found), lat, lon } : { name: 'Your location', state: null, country: null, lat, lon };
         }
       } else {
-        throw erro(400, 'Faltou a cidade (?cidade=) ou as coordenadas (?lat=&lon=).');
+        throw httpError(400, 'Missing the city (?city=) or the coordinates (?lat=&lon=).');
       }
 
-      const { atual, previsao, ar } = await buscarClima(local.lat, local.lon);
-      res.json(montarResposta({ local, atual, previsao, ar, fonte }));
+      const { current, forecast, air } = await getWeather(location.lat, location.lon);
+      res.json(buildResponse({ location, current, forecast, air, source }));
     } catch (e) {
       next(e);
     }
   });
 
-  // em produção o servidor entrega o front buildado também
-  if (fs.existsSync(PASTA_WEB)) {
-    app.use(express.static(PASTA_WEB));
-    app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(PASTA_WEB, 'index.html')));
+  // in production the server also serves the built front end
+  if (fs.existsSync(WEB_FOLDER)) {
+    app.use(express.static(WEB_FOLDER));
+    app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(WEB_FOLDER, 'index.html')));
   }
 
   // eslint-disable-next-line no-unused-vars
   app.use((e, req, res, next) => {
     if (!e.status) console.error(e);
-    res.status(e.status || 500).json({ erro: e.status ? e.message : 'Deu algum erro no servidor.' });
+    res.status(e.status || 500).json({ error: e.status ? e.message : 'Something went wrong on the server.' });
   });
 
   return app;
 }
 
-module.exports = { criarApp };
+module.exports = { createApp };

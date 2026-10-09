@@ -1,11 +1,11 @@
-name: Testes
+name: Tests
 
 on:
   push:
   pull_request:
 
 jobs:
-  testes:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,7 +14,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Testes do servidor e do front-end
+      - name: Server and front end tests
         run: npm test
-      - name: Build do front-end
+      - name: Front end build
         run: npm run build

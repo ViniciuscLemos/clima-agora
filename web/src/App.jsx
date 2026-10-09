@@ -1,136 +1,136 @@
 import { useEffect, useRef, useState } from 'react';
-import { climaPorLocal, climaPorNome } from './api';
-import { dataLocalIso, fundoDoClima } from './utils/formatar';
-import Busca from './components/Busca';
-import CidadesBrasil from './components/CidadesBrasil';
-import ClimaAtual from './components/ClimaAtual';
-import { ProximasHoras, ProximosDias } from './components/Previsao';
+import { weatherByName, weatherByPlace } from './api';
+import { backgroundFor, localIsoDate } from './utils/format';
+import Search from './components/Search';
+import BrazilCities from './components/BrazilCities';
+import CurrentWeather from './components/CurrentWeather';
+import { NextDays, NextHours } from './components/Forecast';
 
-function lerSalvo(chave, padrao) {
+function readSaved(key, fallback) {
   try {
-    return JSON.parse(localStorage.getItem(chave)) ?? padrao;
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
   } catch {
-    return padrao;
+    return fallback;
   }
 }
 
-function salvar(chave, valor) {
+function save(key, value) {
   try {
-    localStorage.setItem(chave, JSON.stringify(valor));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // aba anônima com storage bloqueado, só não salva
+    // private tab with storage blocked, it just doesn't save
   }
 }
 
 export default function App() {
-  const [dados, setDados] = useState(null);
-  const [erro, setErro] = useState('');
-  const [carregando, setCarregando] = useState(false);
-  const [unidade, setUnidade] = useState(() => lerSalvo('unidade', 'C'));
-  const [recentes, setRecentes] = useState(() => lerSalvo('recentes', []));
-  const ultimaBusca = useRef(null);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [unit, setUnit] = useState(() => readSaved('unit', 'C'));
+  const [recent, setRecent] = useState(() => readSaved('recent', []));
+  const lastSearch = useRef(null);
 
-  useEffect(() => salvar('unidade', unidade), [unidade]);
-  useEffect(() => salvar('recentes', recentes), [recentes]);
+  useEffect(() => save('unit', unit), [unit]);
+  useEffect(() => save('recent', recent), [recent]);
 
-  async function carregar(buscar) {
-    // se a pessoa buscar outra cidade antes da primeira responder, cancela a anterior
-    ultimaBusca.current?.abort();
-    const controle = new AbortController();
-    ultimaBusca.current = controle;
+  async function load(fetcher) {
+    // if the person searches another city before the first one answers, cancel the previous one
+    lastSearch.current?.abort();
+    const controller = new AbortController();
+    lastSearch.current = controller;
 
-    setCarregando(true);
-    setErro('');
+    setLoading(true);
+    setError('');
     try {
-      const resposta = await buscar(controle.signal);
-      setDados(resposta);
+      const response = await fetcher(controller.signal);
+      setData(response);
 
-      const { nome, estado, pais, lat, lon } = resposta.local;
-      setRecentes((lista) => [
-        { nome, estado, pais, lat, lon },
-        ...lista.filter((c) => c.nome !== nome || c.pais !== pais),
+      const { name, state, country, lat, lon } = response.location;
+      setRecent((list) => [
+        { name, state, country, lat, lon },
+        ...list.filter((c) => c.name !== name || c.country !== country),
       ].slice(0, 5));
     } catch (e) {
-      if (e.name !== 'AbortError') setErro(e.message);
+      if (e.name !== 'AbortError') setError(e.message);
     } finally {
-      if (ultimaBusca.current === controle) setCarregando(false);
+      if (lastSearch.current === controller) setLoading(false);
     }
   }
 
-  const buscarNome = (nome) => carregar((signal) => climaPorNome(nome, signal));
-  const buscarLocal = (local) => carregar((signal) => climaPorLocal(local, signal));
+  const searchName = (name) => load((signal) => weatherByName(name, signal));
+  const searchPlace = (place) => load((signal) => weatherByPlace(place, signal));
 
-  function minhaLocalizacao() {
+  function myLocation() {
     if (!navigator.geolocation) {
-      setErro('Seu navegador não tem localização.');
+      setError("Your browser doesn't support location.");
       return;
     }
-    setCarregando(true);
+    setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => buscarLocal({ lat: pos.coords.latitude.toFixed(4), lon: pos.coords.longitude.toFixed(4) }),
+      (pos) => searchPlace({ lat: pos.coords.latitude.toFixed(4), lon: pos.coords.longitude.toFixed(4) }),
       () => {
-        setCarregando(false);
-        setErro('Não deu pra pegar sua localização. Confere se o navegador tem permissão.');
+        setLoading(false);
+        setError("Couldn't get your location. Check if the browser has permission.");
       },
       { timeout: 10000 }
     );
   }
 
-  // abre direto na última cidade pesquisada
+  // opens straight on the last searched city
   useEffect(() => {
-    if (recentes.length) buscarLocal(recentes[0]);
+    if (recent.length) searchPlace(recent[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const hoje = dados && dataLocalIso(dados.atual.atualizado_em, dados.local.fuso_segundos);
+  const today = data && localIsoDate(data.current.updated_at, data.location.utc_offset);
 
   return (
-    <div className={`app ${dados ? 'fundo-' + fundoDoClima(dados.atual.icone) : ''}`}>
+    <div className={`app ${data ? 'bg-' + backgroundFor(data.current.icon) : ''}`}>
       <header>
-        <h1>Clima Agora</h1>
-        <div className="unidades">
-          <button className={unidade === 'C' ? 'ativo' : ''} onClick={() => setUnidade('C')}>°C</button>
-          <button className={unidade === 'F' ? 'ativo' : ''} onClick={() => setUnidade('F')}>°F</button>
+        <h1>Weather Now</h1>
+        <div className="units">
+          <button className={unit === 'C' ? 'active' : ''} onClick={() => setUnit('C')}>°C</button>
+          <button className={unit === 'F' ? 'active' : ''} onClick={() => setUnit('F')}>°F</button>
         </div>
       </header>
 
       <main>
-        <Busca onBuscar={buscarNome} onEscolher={buscarLocal} onLocalizar={minhaLocalizacao} carregando={carregando} />
+        <Search onSearch={searchName} onPick={searchPlace} onLocate={myLocation} loading={loading} />
 
-        {recentes.length > 0 && (
-          <div className="recentes">
-            <span className="cinza">Recentes:</span>
-            {recentes.map((c) => (
-              <button key={`${c.lat},${c.lon}`} className="chip" onClick={() => buscarLocal(c)}>{c.nome}</button>
+        {recent.length > 0 && (
+          <div className="recent">
+            <span className="muted">Recent:</span>
+            {recent.map((c) => (
+              <button key={`${c.lat},${c.lon}`} className="chip" onClick={() => searchPlace(c)}>{c.name}</button>
             ))}
-            <button className="link" onClick={() => setRecentes([])}>limpar</button>
+            <button className="link" onClick={() => setRecent([])}>clear</button>
           </div>
         )}
 
-        {erro && <p className="erro">{erro}</p>}
+        {error && <p className="error">{error}</p>}
 
-        {!dados && !erro && (
-          <p className="vazio">{carregando ? 'Carregando...' : 'Pesquise uma cidade pra ver o clima.'}</p>
+        {!data && !error && (
+          <p className="empty">{loading ? 'Loading...' : 'Search for a city to see the weather.'}</p>
         )}
 
-        {!dados && !carregando && <CidadesBrasil onEscolher={buscarLocal} />}
+        {!data && !loading && <BrazilCities onPick={searchPlace} />}
 
-        {dados && (
-          <div className={`grade ${carregando ? 'carregando' : ''}`}>
-            <ClimaAtual local={dados.local} atual={dados.atual} ar={dados.qualidade_ar} unidade={unidade} />
-            <div className="coluna">
-              <ProximasHoras horas={dados.horas} fuso={dados.local.fuso_segundos} unidade={unidade} />
-              <ProximosDias dias={dados.dias} hoje={hoje} unidade={unidade} />
+        {data && (
+          <div className={`grid ${loading ? 'loading' : ''}`}>
+            <CurrentWeather location={data.location} current={data.current} air={data.air_quality} unit={unit} />
+            <div className="column">
+              <NextHours hours={data.hours} offset={data.location.utc_offset} unit={unit} />
+              <NextDays days={data.days} today={today} unit={unit} />
             </div>
           </div>
         )}
       </main>
 
       <footer>
-        {/* só mostra a fonte depois da primeira busca, antes disso não dá pra saber qual é */}
-        {dados?.fonte === 'open-meteo' && <>Dados do <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · </>}
-        {dados?.fonte === 'openweather' && <>Dados da <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> · </>}
-        feito por <a href="https://github.com/ViniciuscLemos" target="_blank" rel="noreferrer">Vinicius Lemos</a>
+        {/* only shows the source after the first search, before that there's no way to know which one it is */}
+        {data?.source === 'open-meteo' && <>Data from <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> · </>}
+        {data?.source === 'openweather' && <>Data from <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a> · </>}
+        made by <a href="https://github.com/ViniciuscLemos" target="_blank" rel="noreferrer">Vinicius Lemos</a>
       </footer>
     </div>
   );

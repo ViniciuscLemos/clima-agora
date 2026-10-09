@@ -1,8 +1,8 @@
 {
-  "name": "clima-agora",
+  "name": "weather-now",
   "version": "1.0.0",
   "private": true,
-  "description": "App de previsão do tempo com React + Node.js usando a API da OpenWeather",
+  "description": "Weather forecast app with React + Node.js using the OpenWeather API",
   "workspaces": [
     "server",
     "web"

@@ -1,17 +1,17 @@
-# Configuração do Render (Blueprint): um serviço só, que monta o React e sobe o Express.
-# O Express entrega o site e a API no mesmo endereço.
+# Render config (Blueprint): a single service that builds React and starts Express.
+# Express serves the site and the API at the same address.
 services:
   - type: web
-    name: clima-agora
+    name: weather-now
     runtime: node
     plan: free
     region: virginia
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
-    healthCheckPath: /api/saude
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "24"
-      # opcional: sem a chave o app usa o Open-Meteo, que não pede chave
+      # optional: without the key the app uses Open-Meteo, which needs no key
       - key: OPENWEATHER_API_KEY
         sync: false
