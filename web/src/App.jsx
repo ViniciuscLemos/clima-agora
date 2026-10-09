@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { weatherByName, weatherByPlace } from './api';
 import { backgroundFor, localIsoDate } from './utils/format';
 import Search from './components/Search';
+import WeatherIcon from './components/WeatherIcon';
 import BrazilCities from './components/BrazilCities';
 import CurrentWeather from './components/CurrentWeather';
 import { NextDays, NextHours } from './components/Forecast';
@@ -109,8 +110,22 @@ export default function App() {
 
         {error && <p className="error">{error}</p>}
 
-        {!data && !error && (
-          <p className="empty">{loading ? 'Loading...' : 'Search for a city to see the weather.'}</p>
+        {!data && loading && (
+          <div className="grid" aria-busy="true" aria-label="Loading the weather">
+            <div className="skeleton" style={{ height: 420 }} />
+            <div className="column">
+              <div className="skeleton" style={{ height: 190 }} />
+              <div className="skeleton" style={{ height: 240 }} />
+            </div>
+          </div>
+        )}
+
+        {!data && !loading && !error && (
+          <div className="hero">
+            <WeatherIcon icon="10d" size={120} />
+            <h2>What's the weather like?</h2>
+            <p>Search any city in the world, use your location or pick one of the cities below.</p>
+          </div>
         )}
 
         {!data && !loading && <BrazilCities onPick={searchPlace} />}

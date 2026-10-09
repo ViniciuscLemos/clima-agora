@@ -43,10 +43,6 @@ export function windDirection(degrees) {
   return DIRECTIONS[Math.round(((degrees % 360) + 360) % 360 / 45) % 8];
 }
 
-export function iconUrl(icon, size = '2x') {
-  return `https://openweathermap.org/img/wn/${icon}@${size}.png`;
-}
-
 // background class from the icon (the "n" at the end means night)
 export function backgroundFor(icon = '01d') {
   if (icon.endsWith('n')) return 'night';
