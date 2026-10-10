@@ -1,0 +1,138 @@
+{
+  "location": {
+    "name": "São Paulo",
+    "state": "São Paulo",
+    "country": "BR",
+    "lat": -23.5506507,
+    "lon": -46.6333824,
+    "utc_offset": -10800
+  },
+  "current": {
+    "temperature": 18.4,
+    "feels_like": 18.1,
+    "min": 17.2,
+    "max": 19.8,
+    "humidity": 72,
+    "pressure": 1018,
+    "wind_kmh": 13,
+    "wind_deg": 140,
+    "visibility_km": 10,
+    "description": "Overcast clouds",
+    "icon": "04d",
+    "sunrise": 1717236000,
+    "sunset": 1717272000,
+    "updated_at": 1717243200
+  },
+  "hours": [
+    {
+      "time": 1717243200,
+      "temperature": 23,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 0
+    },
+    {
+      "time": 1717254000,
+      "temperature": 23,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 10
+    },
+    {
+      "time": 1717264800,
+      "temperature": 23,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 20
+    },
+    {
+      "time": 1717275600,
+      "temperature": 15,
+      "icon": "10n",
+      "description": "Light rain",
+      "rain_chance": 30
+    },
+    {
+      "time": 1717286400,
+      "temperature": 15,
+      "icon": "10n",
+      "description": "Light rain",
+      "rain_chance": 40
+    },
+    {
+      "time": 1717297200,
+      "temperature": 16,
+      "icon": "10n",
+      "description": "Light rain",
+      "rain_chance": 0
+    },
+    {
+      "time": 1717308000,
+      "temperature": 16,
+      "icon": "10n",
+      "description": "Light rain",
+      "rain_chance": 10
+    },
+    {
+      "time": 1717318800,
+      "temperature": 16,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 20
+    }
+  ],
+  "days": [
+    {
+      "date": "2024-06-01",
+      "min": 14,
+      "max": 24,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 40,
+      "humidity": 68
+    },
+    {
+      "date": "2024-06-02",
+      "min": 15,
+      "max": 25,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 40,
+      "humidity": 70
+    },
+    {
+      "date": "2024-06-03",
+      "min": 15,
+      "max": 26,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 40,
+      "humidity": 71
+    },
+    {
+      "date": "2024-06-04",
+      "min": 16,
+      "max": 27,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 40,
+      "humidity": 69
+    },
+    {
+      "date": "2024-06-05",
+      "min": 17,
+      "max": 28,
+      "icon": "10d",
+      "description": "Light rain",
+      "rain_chance": 40,
+      "humidity": 70
+    }
+  ],
+  "air_quality": {
+    "index": 2,
+    "label": "Fair",
+    "pm2_5": 12.3,
+    "pm10": 20.1
+  },
+  "source": "open-meteo"
+}
