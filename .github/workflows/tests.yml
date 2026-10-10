@@ -18,3 +18,8 @@ jobs:
         run: npm test
       - name: Front end build
         run: npm run build
+      # the api is mocked in the tests, so no key or internet is needed here
+      - name: End to end tests
+        run: |
+          npx playwright install --with-deps chromium
+          npm run e2e
