@@ -8,7 +8,7 @@
   --body: #cfe3ff;
   --text: #1d2738;
   --subtitle: #56637a;
-  --muted: #66738a;
+  --muted: #56637a; /* 4.5:1 on the light boxes, the WCAG AA minimum for small text */
   --card: rgba(255, 255, 255, 0.9);
   --box: #f1f5fb;
   --field: #fff;

@@ -33,7 +33,8 @@ export function NextHours({ hours, offset, unit }) {
   return (
     <section className="card">
       <h3>Next hours</h3>
-      <div className="hours-scroll">
+      {/* focusable, so keyboard users can scroll it sideways with the arrow keys */}
+      <div className="hours-scroll" tabIndex={0} role="region" aria-label="Next hours, scrolls sideways">
         <div className="hours" style={{ '--count': hours.length }}>
           <TemperatureLine values={temps} />
           <ul>
